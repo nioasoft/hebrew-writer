@@ -1722,7 +1722,7 @@ Run these checks IN ORDER and call Read for every file whose trigger fires:
 |---|------|-------------------------------|
 | 1 | `layers/voice-cloning.md` | Any of: `--voice`, `--setup`, `--setup-deep`, `--calibrate`, `--my-voice`, `--my-voice-file`, `--my-voice-files`, `--learn`, `--save-as` |
 | 2 | `layers/soul-deep.md` | `--type` is `blog` / `creative` / `social` (always — no length condition), OR `--length` is `medium`/`long`/`xl` (≥400w), OR voice profile loaded, OR first-person/opinion/narrative input |
-| 3 | `layers/versatility.md` | `--type` is `blog` / `creative` AND `--length` is `medium`/`long`/`xl`, OR voice profile loaded, OR `--fresh` present, OR 2nd+ Hebrew piece in session |
+| 3 | `layers/versatility.md` | `--type` is `blog` / `creative` / `op-ed` / `newsletter` AND `--length` is `medium`/`long`/`xl`, OR voice profile loaded, OR `--fresh` present, OR 2nd+ Hebrew piece in session |
 | 4 | `layers/self-audit-full.md` | DO NOT preload. Load only at Step 7 if a draft scores below 95 AND the weak dimension isn't clear from the 10/10 standard alone |
 | 5 | `layers/examples-extra.md` | `--mode rewrite` on non-blog content, OR `--mode detect` |
 
