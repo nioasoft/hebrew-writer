@@ -63,7 +63,21 @@ Strip flags from `$ARGUMENTS`; remainder is the topic/text. All flags and their 
 
 **Gender flag** controls the WRITER's first-person conjugation (`female` → אני חושבת/רציתי/כתבתי), not the audience.
 
-**Audience flag** is a MODIFIER on top of `--type`. It changes assumed knowledge level, jargon allowance, formality bump, and CTA framing — but does NOT replace the type's structural rules. Default `auto` infers from the topic (technical topic + dev terms → developer; business pitch + ROI framing → executive; consumer product → customer; otherwise → general). See Audience Profiles section for the per-audience modifications.
+**Audience flag** is a MODIFIER on top of `--type`. It changes assumed knowledge level, jargon allowance, formality bump, and CTA framing — but does NOT replace the type's structural rules. See Audience Profiles section for the per-audience modifications.
+
+**Audience auto-detection** (when `--audience auto`, infer in this priority order):
+
+| Signal in topic/text | → audience |
+|---|---|
+| Code blocks · `commit`/`deploy`/`API`/`regex`/`SDK`/file paths · technical English jargon | `developer` |
+| ROI · runway · אקזיט · MRR · churn · "בורד" · "סבב" · CFO/CEO/CMO mentions | `executive` |
+| "אתה תקבל" / "you get" framing · pricing/benefit framing · CTA verbs · consumer product context | `customer` |
+| Codenames in CAPS · internal team references · "כמו שדיברנו ב..." · acronyms without expansion | `internal` |
+| Domain-specialist terminology without explanation · "כפי שידוע ל[domain]" · academic citations | `expert` |
+| TikTok/Instagram references · current Gen Z slang · gaming/content-creator references | `youth` |
+| None of the above | `general` |
+
+When two signals conflict (e.g., technical topic + executive vocab), pick the one with the LARGER behavioral impact for the piece — for a Q3 results dashboard, `executive` beats `developer` even if there's a metric or two.
 
 **Error handling:**
 - No text AND no file flag → `AskUserQuestion`: "על מה לכתוב? / What should I write about?"
@@ -1097,6 +1111,7 @@ These presets modify Layer 3 and Layer 5 behavior by content type.
 **Dugri rule modified:** No first-person opinion. The journalist's position appears through SELECTION (which facts get the lead, which sources are quoted) — not through editorializing verbs.
 **Characteristic opener:** Lead sentence answers ≥3 of: who/what/when/where/why. Example: "שני אנשים נפצעו הבוקר (חמישי) בתאונת דרכים בכביש 4 סמוך למחלף שילת."
 **Banned for news:** Macro copy windups, LinkedIn punchlines, op-ed style first-person, marketing adjectives.
+**Default `--length`:** short (200-400w). Most news items don't justify more.
 
 ## Op-Ed / טור דעה
 
@@ -1123,6 +1138,7 @@ These presets modify Layer 3 and Layer 5 behavior by content type.
 **Cultural refs:** Rare — landing pages often address a non-Israeli audience too.
 **Dugri rule modified:** Take a position about the PRODUCT (it solves X, it doesn't try to do Y), not about ideology. The position is value-prop, not opinion.
 **Characteristic opener:** Headline states the value-prop in plain Hebrew. Banned: "פתרון מקיף ל..." / "החדשנות שמשנה את..." / "הכלי שכולם מדברים עליו." Allowed: specific, concrete claim ("חוסך 5 שעות בשבוע למנהלי תיקים בתל אביב").
+**Default `--length`:** short (200-400w). Landing pages bleed conversion past that.
 
 ## Newsletter / ניוזלטר
 
@@ -1136,6 +1152,7 @@ These presets modify Layer 3 and Layer 5 behavior by content type.
 **Cultural refs:** Frequent and intimate — shared insider context with regular readers.
 **Characteristic opener:** Greeting + one specific personal detail anchoring this issue's vibe. Banned: "ברוכים הבאים לגיליון השבוע" (corporate). Allowed: "היי. השבוע הזה היה ארוך, ואני כנראה חולה. בכל זאת — שלושה דברים שכדאי לקרוא."
 **Sign-off:** First name, optionally with one extra line of warmth or self-aware humor. Not "בברכה."
+**Default `--length`:** medium (500-800w).
 
 ## Technical / טכני
 
@@ -1150,7 +1167,8 @@ These presets modify Layer 3 and Layer 5 behavior by content type.
 **English tech terms:** Keep in English where the Hebrew translation is awkward (commit, push, deploy, container, regex). Don't force תרגומים תקניים שאיש לא משתמש בהם.
 **Code blocks:** Use them. Hebrew prose around them, Latin/English inside.
 **Characteristic opener:** "המטרה: [X]. הצעד הראשון: [Y]." Banned: poetic intros, "במאמר זה נסביר" preludes. Just start.
-**Dugri rule modified:** Honesty about what won't work. "אם אתה ב-Windows — הסקריפט הזה לא יעבוד לך. תקפוץ ל-WSL או תעבוד בקובץ .bat נפרד."
+**Dugri rule modified:** Honesty about what won't work. "אם אתה ב-Windows, הסקריפט הזה לא יעבוד לך. תקפוץ ל-WSL או תעבוד בקובץ .bat נפרד."
+**Default `--length`:** medium (500-800w). Tutorials need room for prerequisites + steps + verification.
 
 ## Academic / Professional
 
@@ -1325,7 +1343,17 @@ Each dimension scored 0-10, multiply weights, sum, multiply by 10 → out of 100
 All 9s → 90/100. To reach 95: most dimensions at 9.5-10, none below 8.
 ```
 
-**Quality gate:** 95/100 minimum AND no individual dimension below 8/10. Either fails → revise.
+**Quality gate (genre-calibrated):** Different content types have different ceilings on subjective dimensions like נשמה (Soul). News and technical docs are honestly less "soul-y" than blogs and op-eds — penalizing them against a uniform 95 threshold produces inflated scores or impossible revision loops.
+
+| --type | Threshold | Floor for any single dim |
+|--------|-----------|--------------------------|
+| blog, op-ed, creative, newsletter, social | **95** | 8/10 |
+| business, email, landing | **85** | 7/10 |
+| news, technical, academic | **78** | 7/10 (נשמה+נשמה עמוקה may be 5-6) |
+
+For news/technical/academic, the נשמה (7%) and נשמה עמוקה (7%) dimensions are CAPPED at 7/10 in the rubric — pushing higher means injecting first-person opinion or memory drops where the genre forbids them. Score honestly within the cap.
+
+**Either condition fails → revise per the loop in Step 7.**
 
 ---
 
@@ -1415,9 +1443,10 @@ When `--show-score` is set, append after the generated text:
 | **סה"כ** | | **100%** | **XX/100** |
 
 **הערות:** [One sentence on the weakest dimension and why — honest, not boilerplate]
+**Revision history:** draft 1 → AA/100 · [draft 2 → BB/100 ·] final → XX/100 (genre threshold: TT)
 ```
 
-Keep the score honest. 96 and 91 both have meaning — inflate neither.
+Keep the score honest. 96 and 91 both have meaning — inflate neither. The `genre threshold` value comes from the genre-calibrated table earlier in this Layer (95 for blog/op-ed, 85 for business/landing, 78 for news/technical).
 
 ---
 
@@ -1754,7 +1783,11 @@ After generating the initial draft, before self-audit: scan explicitly for Tier 
 
 SCAN PROCEDURE — run each check in sequence:
 
-1. **Em-dash scan.** Search the entire draft for the character —. Every occurrence is a Tier 1 violation. Replacement rules: use a comma for a parenthetical ("החבר שלי, שגר בתל אביב, אמר..."), a period to split the sentence, parentheses for an aside ("(שזה נשמע מוזר, אני יודע)"), or a colon for emphasis ("יש לו רק בעיה אחת: הוא לא מקשיב").
+1. **Em-dash scan.** Search **the OUTPUT TEXT ONLY** — not the surrounding skill instructions, not the user prompt, not your own English commentary. Look for the character `—` (U+2014) in the Hebrew text you are about to deliver to the user. Every occurrence is a Tier 1 violation regardless of context (yes, even between English tech terms; yes, even inside a Hebrew quote; yes, even when "it looks better that way").
+
+   **Common false-positive trap:** Do NOT skip this scan because em-dashes appeared earlier in this conversation (in the loaded skill content, in baselines, in user examples). Those don't count. The scan target is YOUR Hebrew output for THIS request.
+
+   **Replacement rules:** comma for a parenthetical ("החבר שלי, שגר בתל אביב, אמר..."), period to split, parentheses for an aside, colon for emphasis ("יש לו רק בעיה אחת: הוא לא מקשיב"). En-dash (–, U+2013) is also banned.
 
 2. **Blacklist vocabulary scan.** Check the draft for each of the 16 banned words:
    מגוון / מרתק / חיוני / מהותי / ייחודי / רב-ממדי / מקיף / חדשני / פורץ דרך / חסר תקדים / משמעותי / מרכזי / בולט / רלוונטי / רב-תכליתי / מאתגר
@@ -1786,6 +1819,12 @@ Score against all 9 dimensions using the 10/10 standard table in Layer 6.
 The Tier 1 scan in Step 6.5 should have already cleared Tier 1 violations — Layer 6's Tier 1 table is the backup confirmation, not primary enforcement.
 
 **Honest scoring rule:** Never round up to pass the gate. If the honest score is 87, output 87 and run the revision loop. Inflating scores defeats the purpose.
+
+**Revision proof (when `--show-score` is set):** Append after the final score block, on a single line, the revision history in the format:
+```
+**Revision history:** draft 1 → XX/100 · draft 2 → YY/100 · final → ZZ/100 (genre threshold: TT)
+```
+If no revision was needed (draft 1 already at threshold), write: `**Revision history:** draft 1 → ZZ/100 (passed first attempt, genre threshold: TT)`. This is non-negotiable proof that the revision loop actually ran. Fabricating a history line you didn't actually compute is worse than skipping the loop — it pollutes the trust signal.
 
 **Step 8: Voice adjustments** (Layer 7, only if `voice-cloning.md` loaded AND profile in use)
 Apply the Smart Fusion Engine priority order from `voice-cloning.md`:
